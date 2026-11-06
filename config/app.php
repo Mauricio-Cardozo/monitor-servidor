@@ -15,6 +15,9 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    // Botones que abren programas en el servidor (TP 2). Desactivados por defecto.
+    'demo_apps' => env('DEMO_APPS', false),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
