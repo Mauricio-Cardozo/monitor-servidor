@@ -47,6 +47,7 @@
 </head>
 <body>
     <h1>Monitor del servidor</h1>
+    <p><a href="/graficos">Ver gráficos en tiempo real →</a></p>
     <p>
         WebSocket: <span id="estado" class="off">Conectando...</span>
         · Última lectura: <span id="at">{{ $data['at'] }}</span>
