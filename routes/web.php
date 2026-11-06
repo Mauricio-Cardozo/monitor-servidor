@@ -13,3 +13,5 @@ Route::get('/servidor', [ServerController::class, 'index']);
 Route::post('/demo/abrir/{app}', [DemoController::class, 'abrir'])
     ->whereIn('app', ['calculadora', 'bloc'])
     ->middleware('throttle:2,1'); // cada PC puede abrir 2 programas por minuto
+
+Route::get('/graficos', fn () => view('graficos'));
