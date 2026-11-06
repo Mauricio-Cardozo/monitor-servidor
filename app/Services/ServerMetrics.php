@@ -123,13 +123,37 @@ class ServerMetrics
             $datos['cpu_pct'] = round(100 * $ocupado / ($b['total'] - $a['total']), 1);
         }
 
-        // Temperatura en miligrados Celsius (no todos los equipos la informan)
-        $temp = @file_get_contents('/sys/class/thermal/thermal_zone0/temp');
-        if ($temp !== false && is_numeric(trim($temp))) {
-            $datos['temp_c'] = round((int) trim($temp) / 1000, 1);
+        $temp = $this->linuxTemp();
+        if ($temp !== null) {
+            $datos['temp_c'] = $temp;
         }
 
         return $datos ?: null;
+    }
+
+    // Temperatura de la CPU en °C. Los archivos la informan en miligrados.
+    private function linuxTemp(): ?float
+    {
+        // 1. Zona térmica ACPI (muchas notebooks y placas Intel)
+        $temp = @file_get_contents('/sys/class/thermal/thermal_zone0/temp');
+        if ($temp !== false && is_numeric(trim($temp))) {
+            return round((int) trim($temp) / 1000, 1);
+        }
+
+        // 2. Sensores hwmon del procesador: k10temp/zenpower (AMD) o coretemp (Intel)
+        foreach (glob('/sys/class/hwmon/hwmon*') ?: [] as $dir) {
+            $nombre = trim((string) @file_get_contents("$dir/name"));
+            if (! in_array($nombre, ['k10temp', 'zenpower', 'coretemp'], true)) {
+                continue;
+            }
+
+            $temp = @file_get_contents("$dir/temp1_input");
+            if ($temp !== false && is_numeric(trim($temp))) {
+                return round((int) trim($temp) / 1000, 1);
+            }
+        }
+
+        return null;
     }
 
     private function cpuStat(): ?array
